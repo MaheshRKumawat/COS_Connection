@@ -14,26 +14,26 @@ import (
 )
 
 type COS_Instance struct {
-	apikey            string
-	serviceInstanceID string
-	authEndpoint      string
-	serviceEndpoint   string
-	bucketName        string
+	ApiKey            string
+	ServiceInstanceID string
+	AuthEndpoint      string
+	ServiceEndpoint   string
+	BucketName        string
 }
 
 func Connect(c COS_Instance) (bucket *s3.ListObjectsV2Output, object_keys []string, client *s3.S3, err error) {
 
 	conf := aws.NewConfig().
 		WithRegion("us-standard").
-		WithEndpoint(c.serviceEndpoint).
-		WithCredentials(ibmiam.NewStaticCredentials(aws.NewConfig(), c.authEndpoint, c.apikey, c.serviceInstanceID)).
+		WithEndpoint(c.ServiceEndpoint).
+		WithCredentials(ibmiam.NewStaticCredentials(aws.NewConfig(), c.AuthEndpoint, c.ApiKey, c.ServiceInstanceID)).
 		WithS3ForcePathStyle(true)
 
 	sess := session.Must(session.NewSession())
 	client = s3.New(sess, conf)
 
 	list_objects := &s3.ListObjectsV2Input{
-		Bucket: aws.String(c.bucketName),
+		Bucket: aws.String(c.BucketName),
 	}
 
 	bucket, err = client.ListObjectsV2(list_objects)
@@ -64,7 +64,7 @@ func Check_keys(object_keys []string, key string) bool {
 func Read_file_from_cos(c COS_Instance, key string, client *s3.S3) (err error) {
 	// users will need to create bucket, key (flat string name)
 	Input := s3.GetObjectInput{
-		Bucket: aws.String(c.bucketName),
+		Bucket: aws.String(c.BucketName),
 		Key:    aws.String(key),
 	}
 
@@ -105,7 +105,7 @@ func Write_file_to_cos(c COS_Instance, key string, client *s3.S3) (err error) {
 	content := bytes.NewReader([]byte(DataBytes))
 
 	input := s3.PutObjectInput{
-		Bucket: aws.String(c.bucketName),
+		Bucket: aws.String(c.BucketName),
 		Key:    aws.String(key),
 		Body:   content,
 	}
